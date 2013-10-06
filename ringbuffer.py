@@ -1,7 +1,21 @@
-__author__ = 'lrvillan'
+# coding=utf-8
+"""
+Created on Tue Sep 03 13:20:31 2013
+
+This class is a simple ring buffer.
+
+@author: rulas
+"""
+__author__ = 'rulas'
 
 
-class RingBuffer():
+class RingBuffer(object):
+    """
+    Convenient ringbuffer
+
+    :param size:
+    """
+
     def __init__(self, size):
         self._size = size
         self.clear()
@@ -16,7 +30,7 @@ class RingBuffer():
 
     def pop(self):
         """
-        pop an element frmom the buffer
+        pop an element from the buffer
         """
         pass
 
@@ -40,7 +54,7 @@ class RingBuffer():
         """
         clears the buffer and create a buffer with the given size
 
-        :param new_size: new size of buffer
+        :param size:
         """
         self._size = size
         self.clear()
