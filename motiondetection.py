@@ -1,4 +1,5 @@
 # coding=utf-8
+from __future__ import division
 """
 Created on Tue Sep 03 13:20:31 2013
 
@@ -8,7 +9,7 @@ This script process video capture and attempt to detect motion on that video
 """
 __author__ = 'rulas'
 
-from __future__ import division
+
 import time
 
 import cv2
@@ -51,8 +52,10 @@ def main():
     """
     frame_rate = 60
     refresh_time = int((1 / frame_rate) * 1000)
+
     ###########################################################################
-    # open camera. user -1 for default. 1 for c920 or external camera.
+    # VIDEO CAPTURE: open camera. user -1 for default. 1 for c920 or external 
+    # camera.
     ###########################################################################
     #vc = cv2.VideoCapture(1)
     vc = cv2.VideoCapture("Video 3.wmv")
