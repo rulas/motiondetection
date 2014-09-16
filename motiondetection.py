@@ -124,7 +124,7 @@ def main():
         # convert to hsv and gray frames
         #######################################################################
         gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
-        cv2.imshow("gray", gray)
+        # cv2.imshow("gray", gray)
 
 
         #######################################################################
@@ -133,7 +133,7 @@ def main():
         #gray = cv2.GaussianBlur(gray, (5, 5), 0)
         gray = cv2.blur(gray, (3, 3))
         #gray = cv2.medianBlur(gray, 5)
-        cv2.imshow("noise removal", gray)
+        # cv2.imshow("noise removal", gray)
 
         #######################################################################
         # update background history, and background average
@@ -147,7 +147,7 @@ def main():
 
         history = rb.buffer
         gray_background = (sum(history) / len(history)).astype(np.uint8)
-        cv2.imshow("background", gray_background)
+        # cv2.imshow("background", gray_background)
 
         #######################################################################
         # do background substraction
@@ -156,7 +156,7 @@ def main():
         image_delta = image_delta.astype(np.uint8)
         delta_threshold = get_trackbar_pos("DeltaThreshold")
         _, image_delta = cv2.threshold(image_delta, delta_threshold, 255, cv2.THRESH_BINARY)
-        cv2.imshow("image_delta", image_delta)
+        # cv2.imshow("image_delta", image_delta)
 
 
         #######################################################################
@@ -174,7 +174,7 @@ def main():
         #######################################################################
         element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         image_delta = cv2.dilate(image_delta, element)
-        cv2.imshow("image_delta_open", image_delta)
+        # cv2.imshow("image_delta_open", image_delta)
 
 
         #######################################################################
@@ -185,13 +185,7 @@ def main():
 
         if alarm_hold_time < time.time(): 
             delta_percentage = 100 * np.count_nonzero(image_delta) / image_delta.size
-            
-            print "delta_percentage = %03.2f " % delta_percentage
             alarm_threshold = get_trackbar_pos("AlarmThreshold")
-            print "alarm_threshold = %03.2f" % alarm_threshold
-
-            # import pdb; pdb.set_trace()
-
 
             if delta_percentage > alarm_threshold and not intrusion_detected:
                 t = threading.Thread(target=run_alarm)
@@ -214,9 +208,20 @@ def main():
         pass
 
         #######################################################################
+        # image info
+        #######################################################################
+        # import pdb; pdb.set_trace()
+        if alarm_hold_time < time.time():
+            pos = (5, 15)
+            info = "motion_rate = %0.2f, threshold = %0.2f" % (delta_percentage, alarm_threshold)
+            cv2.putText(src, info, pos, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), thickness=1, lineType=cv2.CV_AA)
+
+        #######################################################################
         # display video processing output
         #######################################################################
+        
         cv2.imshow("src", src)
+
 
         #######################################################################
         # calculate elapsed time
