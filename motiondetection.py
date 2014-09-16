@@ -11,12 +11,15 @@ __author__ = 'rulas'
 
 
 import time
+import os
+import threading
 
 import cv2
 import cv
 import numpy as np
 
 from ringbuffer import RingBuffer
+from alarm import IntrusionAlarm 
 
 trackbarWindowName = "filters"
 
@@ -40,16 +43,26 @@ def create_trackbars():
     cv2.createTrackbar("HistoryLenght", trackbarWindowName, 10, 32, void_func)
     cv2.createTrackbar("Iterations", trackbarWindowName, 2, 16, void_func)
     cv2.createTrackbar("MorphOpsSize", trackbarWindowName, 2, 16, void_func)
+    cv2.createTrackbar("AlarmThreshold", trackbarWindowName, 50, 100, void_func)
 
 
 def get_trackbar_pos(trackbarname):
     return cv2.getTrackbarPos(trackbarname, trackbarWindowName)
+
+def run_alarm():
+    alarm = IntrusionAlarm()
+    alarm.run()
+    
 
 #@profile
 def main():
     """
     image processing occurs here
     """
+
+    intrusion_detected = False
+    alarm_hold_time = time.time() + 5
+
     frame_rate = 60
     refresh_time = int((1 / frame_rate) * 1000)
 
@@ -57,17 +70,18 @@ def main():
     # VIDEO CAPTURE: open camera. user -1 for default. 1 for c920 or external 
     # camera.
     ###########################################################################
-    #vc = cv2.VideoCapture(1)
-    vc = cv2.VideoCapture("Video 3.wmv")
+    # vc = cv2.VideoCapture(-1)
+    # vc = cv2.VideoCapture("Video 3.wmv")
+    vc = cv2.VideoCapture("test\motion3.mp4")
 
     ###########################################################################
     # create processing windows
     ###########################################################################
-    cv2.namedWindow("src")
-    cv2.namedWindow("gray")
-    cv2.namedWindow("image_delta")
-    cv2.namedWindow("image_delta_open")
-    cv2.namedWindow("noise removal")
+    cv2.namedWindow("src", flags=cv2.WINDOW_NORMAL)
+    cv2.namedWindow("gray", flags=cv2.WINDOW_NORMAL)
+    cv2.namedWindow("image_delta", flags=cv2.WINDOW_NORMAL)
+    cv2.namedWindow("image_delta_open", flags=cv2.WINDOW_NORMAL)
+    cv2.namedWindow("noise removal", flags=cv2.WINDOW_NORMAL)
 
     ###########################################################################
     # create window with trackbars for runtime adjusting
@@ -92,6 +106,10 @@ def main():
     ###########################################################################
     print "start processing image"
     while True:
+        
+        # Clear 
+        os.system('cls' if os.name == 'nt' else 'clear')
+
         #######################################################################
         # start measuring time
         #######################################################################
@@ -157,6 +175,30 @@ def main():
         element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         image_delta = cv2.dilate(image_delta, element)
         cv2.imshow("image_delta_open", image_delta)
+
+
+        #######################################################################
+        # Detect if Motion Alarm is to be triggered
+        # hold off for 5 seconds until image stabilized
+        #######################################################################
+        # import pdb; pdb.set_trace()
+
+        if alarm_hold_time < time.time(): 
+            delta_percentage = 100 * np.count_nonzero(image_delta) / image_delta.size
+            
+            print "delta_percentage = %03.2f " % delta_percentage
+            alarm_threshold = get_trackbar_pos("AlarmThreshold")
+            print "alarm_threshold = %03.2f" % alarm_threshold
+
+            # import pdb; pdb.set_trace()
+
+
+            if delta_percentage > alarm_threshold and not intrusion_detected:
+                t = threading.Thread(target=run_alarm)
+                t.start()
+                intrusion_detected = True    
+                # import pdb; pdb.set_trace()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+        
 
         #######################################################################
         # find and draw contours
