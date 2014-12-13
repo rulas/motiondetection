@@ -55,7 +55,7 @@ class IntrusionAlarm(object):
 		# draw the text onto the surface
 		self.windowSurface.blit(self.robber, self.robberrect)
 		self.windowSurface.blit(self.text, self.textRect)
-		pygame.mixer.music.play(-1)
+		# pygame.mixer.music.play(-1)
 
 		# draw the window onto the screen
 		pygame.display.update()
